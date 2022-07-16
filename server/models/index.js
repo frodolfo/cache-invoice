@@ -1,3 +1,4 @@
 module.exports = {
-  Invoice: require('./Invoice').Invoice,
+  History: require('./History').History,
+  Invoice: require('./Invoice'),
 };
