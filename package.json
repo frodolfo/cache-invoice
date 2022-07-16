@@ -1,26 +1,22 @@
 {
-  "name": "my-app",
+  "name": "cache-invoice",
+  "description": "A simple invoice management application",
+  "author": "Fred Rodolfo",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "web-vitals": "^2.1.4"
-  },
+  "license": "ISC",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "client-start": "cd client && yarn start",
+    "client-build": "cd client && yarn build",
+    "client-test": "cd client && yarn test",
+    "server-start": "cd server && yarn watch",
+    "start": "concurrently -n 'client,server' -c 'bgBlue.bold,bgMagenta.bold' 'yarn client-start' 'yarn server-start'",
+    "bundle": "cp -R ./client/build/ ./dist/client && cp -R ./server/ ./dist/",
+    "build": "mkdir ./dist && yarn client-build && yarn bundle",
+    "app-install": "cd client && yarn && cd ../server && yarn",
+    "test": "yarn client-test",
+    "seed": "cd server && yarn seed",
+    "eject": "cd client && react-scripts eject"
   },
   "browserslist": {
     "production": [
@@ -35,7 +31,6 @@
     ]
   },
   "devDependencies": {
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.1.6"
+    "concurrently": "^7.0.0"
   }
 }
