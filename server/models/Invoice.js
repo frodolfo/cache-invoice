@@ -29,7 +29,7 @@ const InvoiceSchema = new Schema(
       type: Number,
       required: 'Enter total amount for the invoice',
     },
-    history: [HistorySchema]
+    history: [HistorySchema],
   },
   {
     toJSON: {
@@ -39,8 +39,8 @@ const InvoiceSchema = new Schema(
 );
 
 // Helper methods
-InvoiceSchema.virtual("addHistory").set(function (history) {
+InvoiceSchema.virtual('addHistory').set(function (history) {
   this.history.push(history);
 });
 
-module.exports = { 'Invoice', InvoiceSchema };
+module.exports = mongoose.model('Invoice', InvoiceSchema);
