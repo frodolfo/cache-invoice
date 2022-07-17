@@ -14,7 +14,6 @@ export default function App() {
 
         <Routes>
           <Route path="/" element={<Invoices />} />
-          <Route path="/users" element={<Users />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </div>
@@ -24,8 +23,4 @@ export default function App() {
 
 function About() {
   return <h2>About</h2>;
-}
-
-function Users() {
-  return <h2>Users</h2>;
 }
