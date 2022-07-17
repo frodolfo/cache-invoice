@@ -28,11 +28,10 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', ({ body, params }, res) => {
-  db.Invoice.findByIdAndUpdate(
-    params.id,
-    { $push: { history: body } },
-    { new: true, runValidators: true }
-  )
+  db.Invoice.findByIdAndUpdate(params.id, body, {
+    new: true,
+    runValidators: true,
+  })
     .then((data) => {
       res.json(data);
     })

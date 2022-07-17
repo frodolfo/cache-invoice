@@ -21,14 +21,6 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
-  //   useEffect(() => {
-  //     if (formData) {
-  //       // TODO: delete this
-  //       //   console.log('formData: ', formData);
-  //       setShowModal(true);
-  //     }
-  //   }, [formData]);
-
   const clickHandler = async (e) => {
     const id = e?.target?.dataset?.id;
 
@@ -114,6 +106,36 @@ const Invoices = () => {
         <span className="relative text-xs">{status}</span>
       </span>
     );
+  };
+
+  const renderApprovalButton = (invoiceStatus, id) => {
+    let iconEl;
+
+    if (!invoiceStatus) return;
+
+    if (invoiceStatus === 'draft') {
+      iconEl = (
+        <Icon
+          icon="bi:file-earmark-check"
+          className="text-green-700 h-8 ml-2 cursor-pointer"
+          data-id={id}
+          onClick={(e) => approveInvoice(e)}
+        />
+      );
+    } else if (invoiceStatus === 'approved') {
+      iconEl = (
+        <Icon
+          icon="bx:mail-send"
+          className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
+          data-id={id}
+          onClick={(e) => emailInvoice(e)}
+        />
+      );
+    } else {
+      iconEl = null;
+    }
+
+    return iconEl;
   };
 
   const renderInvoices = () => {
@@ -216,7 +238,10 @@ const Invoices = () => {
                 </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
-                {renderStatus(invoiceStatus)}
+                <div className="flex items-center">
+                  {renderStatus(invoiceStatus)}
+                  {renderApprovalButton(invoiceStatus, invoice.id)}
+                </div>
               </td>
             </tr>
           );
@@ -225,12 +250,71 @@ const Invoices = () => {
     );
   };
 
+  const updateInvoice = async (id, action) => {
+    const invoicesCopy = invoices;
+    let invoice, invoiceIndex, newActivity, updateData, result, status;
+
+    if (!id || !action) return;
+
+    status = action;
+
+    invoice = await API.fetchInvoiceById(id);
+
+    if (invoice) {
+      // Set up new activity for the invoice's histoty
+      newActivity = [
+        {
+          invoice_status: status,
+          status_date: Date.now(),
+        },
+      ];
+
+      // Set up update data for the PUT request
+      updateData = {
+        id,
+        current_status: status,
+        history: newActivity.concat(invoice.history),
+      };
+
+      result = await API.putInvoiceUpdate(updateData);
+
+      if (result) {
+        invoiceIndex = invoicesCopy.findIndex(
+          (invoice) => invoice.id === result.id
+        );
+
+        if (invoiceIndex >= 0) {
+          // update list of invoices
+          invoicesCopy[invoiceIndex] = result;
+          setInvoices([...invoicesCopy]);
+        }
+      }
+    }
+  };
+
+  const approveInvoice = async (e) => {
+    const id = e?.target?.dataset.id;
+
+    if (!id) return;
+
+    updateInvoice(id, 'approved');
+  };
+
+  const emailInvoice = async (e) => {
+    const id = e?.target?.dataset.id;
+
+    if (!id) return;
+
+    updateInvoice(id, 'sent');
+    // TODO: send an email
+  };
+
   const submitInvoice = async (payload) => {
     if (!payload) return;
 
     let newHistory = {
       invoice_status: payload?.current_status,
-      status_date: Date.now,
+      status_date: Date.now(),
     };
     let result;
 
@@ -238,9 +322,6 @@ const Invoices = () => {
       Array.isArray(payload.history) && payload.history.length > 0
         ? payload.history.concat(newHistory, payload.history)
         : [newHistory];
-
-    // TODO: delete this
-    console.log('newHistory: ', newHistory);
 
     const postData = {
       ...payload,

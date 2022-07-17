@@ -1,4 +1,4 @@
-const base = '/api';
+const base = '/api/invoices';
 const fetchConfig = {
   mode: 'cors',
   cache: 'no-cache',
@@ -12,7 +12,7 @@ const fetchConfig = {
 
 const fetchCallback = (endpoint, method, data) => {
   return data
-    ? fetch(`${base}/invoices`, {
+    ? fetch(endpoint, {
         method: method,
         ...fetchConfig,
         body: JSON.stringify(data),
@@ -21,35 +21,21 @@ const fetchCallback = (endpoint, method, data) => {
 };
 
 export const fetchAllInvoices = () => {
-  return fetchCallback(`${base}/invoices`);
+  return fetchCallback(`${base}`);
 };
 
 export const fetchInvoiceById = (id) => {
   if (!id) return;
 
-  return fetchCallback(`${base}/invoices/${id}`);
+  return fetchCallback(`${base}/${id}`);
 };
 
 export const postNewInvoice = (invoiceData) => {
-  //   return fetch(`${base}/invoices`, {
-  //     method: 'POST',
-  //     ...fetchConfig,
-  //     body: JSON.stringify(invoiceData),
-  //   }).then((response) => response.json());
-  return fetchCallback(`${base}/invoices`, 'POST', invoiceData);
+  return fetchCallback(`${base}`, 'POST', invoiceData);
 };
 
 export const putInvoiceUpdate = (invoiceData) => {
   if (!invoiceData) return;
 
-  //   return fetch(`${base}/invoices/${invoiceData.id}`, {
-  //     method: 'PUT',
-  //     ...fetchConfig,
-  //     body: JSON.stringify(invoiceData),
-  //   }).then((response) => response.json());
-  return fetchCallback(
-    `${base}/invoices/${invoiceData.id}`,
-    'PUT',
-    invoiceData
-  );
+  return fetchCallback(`${base}/${invoiceData.id}`, 'PUT', invoiceData);
 };
