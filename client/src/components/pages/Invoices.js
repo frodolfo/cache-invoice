@@ -33,6 +33,8 @@ const Invoices = () => {
     }
   };
 
+  const changeHandler = (e, fiield) => {};
+
   const renderStatus = (status) => {
     let colorConfig;
 
@@ -45,6 +47,13 @@ const Invoices = () => {
         colorConfig = {
           textColor: 'text-blue-900',
           bgColor: 'bg-blue-200',
+        };
+        break;
+
+      case 'aoproved':
+        colorConfig = {
+          textColor: 'text-orange-900',
+          bgColor: 'bg-orange-200',
         };
         break;
 
@@ -94,8 +103,7 @@ const Invoices = () => {
 
   const renderInvoices = () => {
     let today = new Date(Date.now());
-    let invoiceDueDate;
-    let invoiceStatus;
+    let invoiceEditable, invoiceDueDate, invoiceStatus;
 
     if (!invoices || !Array.isArray(invoices)) {
       return;
@@ -105,10 +113,14 @@ const Invoices = () => {
       <>
         {invoices.map((invoice, index) => {
           invoiceDueDate = new Date(invoice.due_date);
-          console.log('invoiceDueDate: ', invoiceDueDate);
-          console.log('today: ', today);
+
+          if (invoice.invoice_status === 'draft') {
+            invoiceEditable = true;
+          } else {
+            invoiceEditable = false;
+          }
+
           if (invoiceDueDate < today) {
-            console.log('it is past due');
             invoiceStatus = 'past due';
           } else {
             invoiceStatus = invoice.invoice_status;
@@ -120,10 +132,15 @@ const Invoices = () => {
                 <div className="flex justify-center items-center">
                   <Icon
                     icon="el:file-edit"
-                    className="cursor-pointer w-4 h-4 ml-0 mr-3"
+                    className={
+                      (invoiceEditable ? 'cursor-pointer ' : 'text-gray-400 ') +
+                      'w-4 h-4 ml-0 mr-3'
+                    }
                     data-id={invoice.id}
                     onClick={(e) => {
-                      clickHandler(e);
+                      if (invoiceEditable) {
+                        clickHandler(e);
+                      }
                     }}
                   />
                 </div>
@@ -131,31 +148,45 @@ const Invoices = () => {
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                 <div className="flex items-center">
                   <div>
-                    <p className="text-gray-900 whitespace-no-wrap">
+                    {/* <p className="text-gray-900 whitespace-no-wrap">
                       {invoice.customer_name}
-                    </p>
+                    </p> */}
+                    <input
+                      type="text"
+                      className="text-gray-900 whitespace-no-wrap"
+                      value={invoice.customer_name}
+                    />
                   </div>
                 </div>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {invoice.customer_email}
-                </p>
+                <input
+                  type="text"
+                  className="text-gray-900 whitespace-no-wrap"
+                  value={invoice.customer_email}
+                />
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {invoice.description}
-                </p>
+                <input
+                  type="text"
+                  className="text-gray-900 whitespace-no-wrap"
+                  value={invoice.description}
+                />
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  &#36;{dollarUSLocale.format(invoice.total)}
-                </p>
+                $
+                <input
+                  type="text"
+                  className="text-gray-900 whitespace-no-wrap w-20 text-right"
+                  value={dollarUSLocale.format(invoice.total)}
+                />
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {new Date(invoice.due_date).toLocaleDateString()}
-                </p>
+                <input
+                  type="text"
+                  className="text-gray-900 whitespace-no-wrap w-20 text-right"
+                  value={new Date(invoice.due_date).toLocaleDateString()}
+                />
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
                 {renderStatus(invoiceStatus)}

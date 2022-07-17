@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { HistorySchema } = require('./History');
+const { LineItemSchema } = require('./LineItem');
+
 const Schema = mongoose.Schema;
 
 const InvoiceSchema = new Schema(
@@ -30,6 +32,7 @@ const InvoiceSchema = new Schema(
       type: Number,
       required: 'Enter total amount for the invoice',
     },
+    line_items: [LineItemSchema],
     history: [HistorySchema],
   },
   {
@@ -42,6 +45,18 @@ const InvoiceSchema = new Schema(
 // Helper methods
 InvoiceSchema.virtual('addHistory').set(function (history) {
   this.history.push(history);
+});
+
+InvoiceSchema.virtual('addLineItem').set(function (lineItem) {
+  this.line_items.push(lineItem);
+});
+
+InvoiceSchema.virtual('getTotalCost').set(function () {
+  let totalCost = this.line_items.reduce((sum, lineItem) => {
+    sum += lineItem.itemPrice;
+  });
+
+  return totalCost;
 });
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);
