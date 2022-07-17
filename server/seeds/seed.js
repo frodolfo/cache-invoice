@@ -14,6 +14,8 @@ let invoiceSeed = [
     customer_name: 'John Doe',
     description: 'For services rendered',
     due_date: new Date(2022, 07, 01),
+    total: 35000,
+    invoice_status: 'paid',
     history: [
       {
         status: 'draft',
@@ -38,6 +40,8 @@ let invoiceSeed = [
     customer_name: 'Jane Doe',
     description: 'Subscription',
     due_date: new Date(2022, 07, 15),
+    total: 23500,
+    invoice_status: 'sent',
     history: [
       {
         status: 'draft',

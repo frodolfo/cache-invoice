@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const invoiceRoutes = require('./invoice-routes');
 
-router.use('/invoice', invoiceRoutes);
+router.use('/invoices', invoiceRoutes);
 
 module.exports = router;

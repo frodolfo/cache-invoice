@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const HistorySchema = new Schema(
   {
-    status: {
+    invoiceStatus: {
       type: String,
       trim: true,
       required: 'Enter the invoice status',

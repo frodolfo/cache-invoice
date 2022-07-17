@@ -4,11 +4,16 @@
   "private": true,
   "description": "Client component",
   "dependencies": {
+    "@emotion/react": "^11.9.3",
+    "@heroicons/react": "^1.0.6",
+    "@iconify/react": "^3.2.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0",
+    "sass": "^1.53.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -38,5 +43,6 @@
   "devDependencies": {
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.1.6"
-  }
+  },
+  "proxy": "http://localhost:3001/"
 }

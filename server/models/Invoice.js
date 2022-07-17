@@ -7,23 +7,24 @@ const InvoiceSchema = new Schema(
     customer_email: {
       type: String,
       trim: true,
-      required: 'Enter the product name',
+      required: 'Enter the customer email address',
     },
     customer_name: {
-      type: Number,
-      required: 'Enter the list price of product',
+      type: String,
+      required: 'Enter the fiull name of the customer',
     },
     description: {
-      type: Number,
-      required: 'Enter number of quantity in stock',
+      type: String,
+      required: 'Enter description of the invoice',
     },
     due_date: {
       type: Date,
       required: 'Enter due date for the invoice',
     },
-    status: {
+    invoice_status: {
       type: String,
       trim: true,
+      required: 'Enter the status of the invoice',
     },
     total: {
       type: Number,

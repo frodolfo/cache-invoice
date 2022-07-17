@@ -9,8 +9,16 @@ router.get('/', (req, res) => {
     .catch((err) => res.json(err));
 });
 
+router.get('/:id', (req, res) => {
+  db.Invoice.findById(req.params.id)
+    .then((data) => {
+      res.json(data);
+    })
+    .catch((err) => res.json(err));
+});
+
 router.post('/', (req, res) => {
-  db.Invoice.create({})
+  db.Invoice.create(req.body)
     .then((data) => {
       res.json(data);
     })

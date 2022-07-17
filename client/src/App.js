@@ -1,24 +1,31 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import './App.css';
+import { NavBar } from './components/shared/';
+import { Invoices } from './components/pages';
 
-function App() {
+import './App.scss';
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Cacheflow starter app
-        </p>
-        <a
-          className="App-link"
-          href="https://github.com/getcacheflow/fe-home-1"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Assignment repo
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="container w-screen">
+        <NavBar />
+
+        <Routes>
+          <Route path="/" element={<Invoices />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
-export default App;
+function About() {
+  return <h2>About</h2>;
+}
+
+function Users() {
+  return <h2>Users</h2>;
+}
