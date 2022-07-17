@@ -1,12 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const Modal = ({ buttonLabel, clickHandler }) => {
+const Modal = ({
+  buttonLabel,
+  clickHandler,
+  formData,
+  overrideShowModal,
+  showModalCallback,
+}) => {
+  const [formContent, setFormContent] = useState(formData);
   const [showModal, setShowModal] = useState(false);
-  const [fullName, setFullName] = useState();
-  const [emailAddress, setEmailAddress] = useState();
-  const [description, setDescription] = useState();
-  const [dueDate, setDueDate] = useState();
-  const [totalCost, setTotalCost] = useState();
+  const [fullName, setFullName] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [totalCost, setTotalCost] = useState(0);
+  const [lineItems, setLineItems] = useState();
+
+  useEffect(() => {
+    if (formData) {
+      // TODO: delete this
+      console.log('formData: ', formData);
+      setFormContent(formData);
+    }
+    if (formContent) {
+      console.log('formContent: ', formContent);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (overrideShowModal === true) {
+      setShowModal(true);
+    }
+  }, [overrideShowModal]);
 
   const onChangeHandler = (e, field) => {
     if (!e || !field) return;
@@ -39,16 +64,51 @@ const Modal = ({ buttonLabel, clickHandler }) => {
 
   const onClickHandler = () => {
     const payload = {
-      fullName,
-      emailAddress,
+      customer_email: fullName,
+      customer_name: emailAddress,
       description,
-      dueDate,
-      totalCost,
-      invoice_status: 'draft',
+      due_date: dueDate,
+      total: totalCost,
+      current_status: 'draft',
+      submitType: !formData ? 'new' : 'update',
     };
 
     setShowModal(false);
+    showModalCallback(false);
     clickHandler(payload);
+  };
+
+  const renderLineItem = () => {
+    const items = lineItems || [];
+
+    // if (!lineItems || !Array.isArray(lineItems)) return;
+
+    const addItem = (e) => {
+      e.preventDefault();
+      console.log('New item');
+    };
+
+    return (
+      <div className="py-4">
+        <ul className="pb-4">
+          {items.length > 0 ? (
+            items.map((item, index) => (
+              <li key={index} className="text-sm">
+                {item.item_name} - {item.item_price}
+              </li>
+            ))
+          ) : (
+            <li className="text-sm">No Items</li>
+          )}
+        </ul>
+        <button
+          className="border bg-indigo-700 hover:bg-indigo-500 rounded text-white p-2 text-xs"
+          onClick={(e) => addItem(e)}
+        >
+          Add Item
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -71,7 +131,10 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                   <h3 className="text-3xl font=semibold">New Invoice</h3>
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                      setShowModal(false);
+                      showModalCallback(false);
+                    }}
                   >
                     <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
                       ×
@@ -86,6 +149,8 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
+                      name="fullName"
+                      value={fullName}
                       onChange={(e) => onChangeHandler(e, 'fullName')}
                     />
                     <label className="block text-gray-700 text-sm font-bold mb-1">
@@ -94,6 +159,7 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="emailAddress"
+                      value={emailAddress}
                       onChange={(e) => onChangeHandler(e, 'emailAddress')}
                     />
                     <label className="block text-gray-700 text-sm font-bold mb-1">
@@ -102,6 +168,7 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="description"
+                      value={description}
                       onChange={(e) => onChangeHandler(e, 'description')}
                     />
                     <label className="block text-gray-700 text-sm font-bold mb-1">
@@ -110,14 +177,20 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="description"
+                      value={dueDate}
                       onChange={(e) => onChangeHandler(e, 'dueDate')}
                     />
+                    <label className="block text-gray-700 text-sm font-bold mb-1">
+                      Line Items
+                    </label>
+                    {renderLineItem(lineItems)}
                     <label className="block text-gray-700 text-sm font-bold mb-1">
                       Total Cost
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="totalCost"
+                      value={totalCost}
                       onChange={(e) => onChangeHandler(e, 'totalCost')}
                     />
                   </form>
@@ -127,7 +200,10 @@ const Modal = ({ buttonLabel, clickHandler }) => {
                   <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                      setShowModal(false);
+                      showModalCallback(false);
+                    }}
                   >
                     Close
                   </button>

@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 
 const LineItemSchema = new Schema(
   {
-    itmeName: {
+    item_name: {
       type: String,
       trim: true,
       required: 'Enter the name of the item',
     },
-    itemPrice: {
+    item_price: {
       type: Number,
       required: 'Enter the price of the item',
     },

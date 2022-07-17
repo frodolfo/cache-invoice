@@ -13,25 +13,35 @@ let invoiceSeed = [
     customer_email: 'john.doe@email.com',
     customer_name: 'John Doe',
     description: 'For services rendered',
+    total: 30500,
     due_date: new Date(2022, 07, 01),
-    total: 35000,
-    invoice_status: 'paid',
+    current_status: 'paid',
+    line_items: [
+      {
+        item_name: 'SalesForce',
+        item_price: 25000,
+      },
+      {
+        item_name: 'SalesForce Support',
+        item_price: 5500,
+      },
+    ],
     history: [
       {
-        status: 'draft',
-        statusDate: new Date(2022, 06, 21),
+        invoice_status: 'draft',
+        status_date: new Date(2022, 06, 21),
       },
       {
-        status: 'approved',
-        statusDate: new Date(2022, 06, 24),
+        invoice_status: 'approved',
+        status_date: new Date(2022, 06, 24),
       },
       {
-        status: 'sent',
-        statusDate: new Date(2022, 06, 25),
+        invoice_status: 'sent',
+        status_date: new Date(2022, 06, 25),
       },
       {
-        status: 'paid',
-        statusDate: new Date(2022, 06, 30),
+        invoice_status: 'paid',
+        status_date: new Date(2022, 06, 30),
       },
     ],
   },
@@ -39,21 +49,35 @@ let invoiceSeed = [
     customer_email: 'jane.doe@femail.com',
     customer_name: 'Jane Doe',
     description: 'Subscription',
+    total: 55500,
     due_date: new Date(2022, 06, 15),
-    total: 23500,
-    invoice_status: 'sent',
+    current_status: 'sent',
+    line_items: [
+      {
+        item_name: 'Microsoft Office Enterprise',
+        item_price: 12300,
+      },
+      {
+        item_name: 'SalesForce',
+        item_price: 25000,
+      },
+      {
+        item_name: 'Microsoft SQL Server Enterprise',
+        item_price: 18200,
+      },
+    ],
     history: [
       {
-        status: 'draft',
-        statusDate: new Date(2022, 07, 04),
+        invoice_status: 'draft',
+        status_date: new Date(2022, 07, 04),
       },
       {
-        status: 'approved',
-        statusDate: new Date(2022, 07, 05),
+        invoice_status: 'approved',
+        status_date: new Date(2022, 07, 05),
       },
       {
-        status: 'sent',
-        statusDate: new Date(2022, 07, 07),
+        invoice_status: 'sent',
+        status_date: new Date(2022, 07, 07),
       },
     ],
   },

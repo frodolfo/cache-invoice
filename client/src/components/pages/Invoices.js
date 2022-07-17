@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 
-import { fetchAllInvoices, fetchInvoiceById, postNewInvoice } from '../../api/';
+import * as API from '../../api/';
 import { Modal } from '../shared/';
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState();
+  const [formData, setFormData] = useState();
+  const [showModal, setShowModal] = useState(false);
 
   const dollarUSLocale = Intl.NumberFormat('en-US');
 
   const fetchInvoices = async () => {
-    let invoiceData = await fetchAllInvoices();
+    let invoiceData = await API.fetchAllInvoices();
     console.log(invoiceData);
     setInvoices(invoiceData);
   };
@@ -19,18 +21,32 @@ const Invoices = () => {
     fetchInvoices();
   }, []);
 
+  //   useEffect(() => {
+  //     if (formData) {
+  //       // TODO: delete this
+  //       //   console.log('formData: ', formData);
+  //       setShowModal(true);
+  //     }
+  //   }, [formData]);
+
   const clickHandler = async (e) => {
     const id = e?.target?.dataset?.id;
 
-    let result = await fetchInvoiceById(id);
+    let result = await API.fetchInvoiceById(id);
 
-    if (result && result.invoice_status !== 'draft') {
+    if (result && result.current_status !== 'draft') {
       // TODO: delete this
       console.log('Cannot edit a non-draft invoice');
     } else {
       // TODO: delete this
       console.log('result: ', result);
+      setFormData(result);
+      setShowModal(true);
     }
+  };
+
+  const showModalCallback = (status) => {
+    setShowModal(status);
   };
 
   const changeHandler = (e, fiield) => {};
@@ -42,36 +58,36 @@ const Invoices = () => {
       return;
     }
 
-    switch (status) {
-      case 'draft':
+    switch (status.toUpperCase()) {
+      case 'DRAFT':
         colorConfig = {
           textColor: 'text-blue-900',
           bgColor: 'bg-blue-200',
         };
         break;
 
-      case 'aoproved':
+      case 'APPROVED':
         colorConfig = {
           textColor: 'text-orange-900',
           bgColor: 'bg-orange-200',
         };
         break;
 
-      case 'sent':
+      case 'SENT':
         colorConfig = {
           textColor: 'text-yellow-900',
           bgColor: 'bg-yellow-200',
         };
         break;
 
-      case 'paid':
+      case 'PAID':
         colorConfig = {
           textColor: 'text-green-900',
           bgColor: 'bg-green-200',
         };
         break;
 
-      case 'past due':
+      case 'PAST DUE':
         colorConfig = {
           textColor: 'text-red-900',
           bgColor: 'bg-red-200',
@@ -85,15 +101,14 @@ const Invoices = () => {
     return (
       <span
         className={
-          'relative inline-block px-3 py-1 font-semibold text-green-900 ' +
+          'relative inline-block px-3 py-1 font-semibold ' +
           colorConfig.textColor
         }
       >
         <span
           aria-hidden="true"
           className={
-            'absolute inset-0 bg-green-200 opacity-50 rounded-full ' +
-            colorConfig.bgColor
+            'absolute inset-0 opacity-50 rounded-full ' + colorConfig.bgColor
           }
         ></span>
         <span className="relative text-xs">{status}</span>
@@ -114,7 +129,7 @@ const Invoices = () => {
         {invoices.map((invoice, index) => {
           invoiceDueDate = new Date(invoice.due_date);
 
-          if (invoice.invoice_status === 'draft') {
+          if (invoice.current_status === 'draft') {
             invoiceEditable = true;
           } else {
             invoiceEditable = false;
@@ -123,7 +138,7 @@ const Invoices = () => {
           if (invoiceDueDate < today) {
             invoiceStatus = 'past due';
           } else {
-            invoiceStatus = invoice.invoice_status;
+            invoiceStatus = invoice.current_status;
           }
 
           return (
@@ -148,45 +163,57 @@ const Invoices = () => {
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                 <div className="flex items-center">
                   <div>
-                    {/* <p className="text-gray-900 whitespace-no-wrap">
+                    <p className="text-gray-900 whitespace-no-wrap">
                       {invoice.customer_name}
-                    </p> */}
-                    <input
+                    </p>
+                    {/* <input
                       type="text"
                       className="text-gray-900 whitespace-no-wrap"
                       value={invoice.customer_name}
-                    />
+                    /> */}
                   </div>
                 </div>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <input
+                {/* <input
                   type="text"
                   className="text-gray-900 whitespace-no-wrap"
                   value={invoice.customer_email}
-                />
+                /> */}
+                <p className="text-gray-900 whitespace-no-wrap">
+                  {invoice.customer_email}
+                </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <input
+                {/* <input
                   type="text"
                   className="text-gray-900 whitespace-no-wrap"
                   value={invoice.description}
-                />
+                /> */}
+                <p className="text-gray-900 whitespace-no-wrap">
+                  {invoice.description}
+                </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                $
+                {/* $
                 <input
                   type="text"
                   className="text-gray-900 whitespace-no-wrap w-20 text-right"
                   value={dollarUSLocale.format(invoice.total)}
-                />
+                /> */}
+                <p className="text-gray-900 whitespace-no-wrap">
+                  ${dollarUSLocale.format(invoice.total)}
+                </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                <input
+                {/* <input
                   type="text"
                   className="text-gray-900 whitespace-no-wrap w-20 text-right"
                   value={new Date(invoice.due_date).toLocaleDateString()}
-                />
+                /> */}
+                <p className="text-gray-900 whitespace-no-wrap">
+                  {new Date(invoice.due_date).toLocaleDateString()}
+                </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
                 {renderStatus(invoiceStatus)}
@@ -199,22 +226,33 @@ const Invoices = () => {
   };
 
   const submitInvoice = async (payload) => {
+    if (!payload) return;
+
+    let newHistory = {
+      invoice_status: payload?.current_status,
+      status_date: Date.now,
+    };
+    let result;
+
+    newHistory =
+      Array.isArray(payload.history) && payload.history.length > 0
+        ? payload.history.concat(newHistory, payload.history)
+        : [newHistory];
+
+    // TODO: delete this
+    console.log('newHistory: ', newHistory);
+
     const postData = {
-      customer_email: payload?.emailAddress,
-      customer_name: payload?.fullName,
-      description: payload?.description,
-      due_date: new Date(payload?.dueDate),
-      total: parseInt(payload?.totalCost),
-      invoice_status: payload?.invoice_status,
-      history: [
-        {
-          invoiceStatus: payload?.invoice_status,
-          statusDate: new Date(Date.now()),
-        },
-      ],
+      ...payload,
+      history: newHistory,
     };
 
-    let result = await postNewInvoice(postData);
+    if (payload.submitType === 'new') {
+      result = await API.postNewInvoice(postData);
+    } else {
+      result = await API.putInvoiceUpdate(postData);
+    }
+
     // TODO: delete this
     console.log('result: ', result);
     setInvoices([result, ...invoices]);
@@ -227,6 +265,9 @@ const Invoices = () => {
         <Modal
           buttonLabel={'New Invoice'}
           clickHandler={(p) => submitInvoice(p)}
+          formData={formData}
+          overrideShowModal={showModal}
+          showModalCallback={showModalCallback}
         />
       </div>
       <div className="mx-auto">

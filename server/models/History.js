@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 
 const HistorySchema = new Schema(
   {
-    invoiceStatus: {
+    invoice_status: {
       type: String,
       trim: true,
       required: 'Enter the invoice status',
     },
-    statusDate: {
+    status_date: {
       type: Date,
       default: Date.now,
       required: 'Enter the date the status was updated',

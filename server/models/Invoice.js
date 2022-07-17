@@ -19,18 +19,18 @@ const InvoiceSchema = new Schema(
       type: String,
       required: 'Enter description of the invoice',
     },
+    total: {
+      type: Number,
+      required: 'Enter total amount for the invoice',
+    },
     due_date: {
       type: Date,
       required: 'Enter due date for the invoice',
     },
-    invoice_status: {
+    current_status: {
       type: String,
       trim: true,
       required: 'Enter the status of the invoice',
-    },
-    total: {
-      type: Number,
-      required: 'Enter total amount for the invoice',
     },
     line_items: [LineItemSchema],
     history: [HistorySchema],
