@@ -9,7 +9,7 @@ const NavBar = () => {
             <a className="flex-shrink-0" href="/">
               <img
                 src="https://assets.website-files.com/6287b51d37f98de148e12043/6287b51d37f98d3fa3e12076_cfl-logo-v1.2-rounded.svg"
-                className="h-10"
+                className="h-10 dark:bg-white"
                 loading="lazy"
                 alt="CacheFlow Logo"
               />

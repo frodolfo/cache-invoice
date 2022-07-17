@@ -39,7 +39,7 @@ let invoiceSeed = [
     customer_email: 'jane.doe@femail.com',
     customer_name: 'Jane Doe',
     description: 'Subscription',
-    due_date: new Date(2022, 07, 15),
+    due_date: new Date(2022, 06, 15),
     total: 23500,
     invoice_status: 'sent',
     history: [

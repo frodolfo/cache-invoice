@@ -9,7 +9,7 @@ import './App.scss';
 export default function App() {
   return (
     <Router>
-      <div className="container w-screen">
+      <div className="w-screen">
         <NavBar />
 
         <Routes>
