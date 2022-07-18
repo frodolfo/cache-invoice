@@ -9,7 +9,7 @@ We’re looking for code that is clean, readable, performant, and maintainable. 
   
 We would like you to create a simple invoicing app with the following features:
 
- - [ ] Create a new invoice. Required fields w/ example:
+ - [x] Create a new invoice. Required fields w/ example:
 ```
   "customer_email": "john@test.com",
   "customer_name": "John Daly",
@@ -19,17 +19,17 @@ We would like you to create a simple invoicing app with the following features:
   "total": 35000
 ``` 
  - [ ] Add 1 or many line items to the invoice. Line items may include a breakdown of each thing being invoiced for with an amount
- - [ ] The ability to edit an invoice if its still in draft
- - [ ] The ability to approve an invoice and send it out via email (email doesnt need to be actually sent, simulated is okay)
- - [ ] View a list of invoices by status 
+ - [x] The ability to edit an invoice if its still in draft
+ - [x] The ability to approve an invoice and send it out via email (email doesnt need to be actually sent, simulated is okay)
+ - [x] View a list of invoices by status 
 
 Your backend can be anything, and does not have to work. If you would like to use a mocked-out interface, that is fine (even static data in code is ok).
 
 #### Bonus features (always in priority order)
 
- - [ ] Persist data to storage 
- - [ ] send the email
- - [ ] View late invoices, or even better, alert when an invoice is late
+ - [x] Persist data to storage 
+ - [x] send the email
+ - [x] View late invoices, or even better, alert when an invoice is late
  - [ ] Persist and display event history for an invoice. (ex: created, updated, approved, sent etc...)
 
 ## Tech Stack

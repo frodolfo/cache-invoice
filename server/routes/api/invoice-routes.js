@@ -3,6 +3,7 @@ const db = require('../../models');
 
 router.get('/', (req, res) => {
   db.Invoice.find()
+    .sort({ due_date: 1 })
     .then((data) => {
       res.json(data);
     })
