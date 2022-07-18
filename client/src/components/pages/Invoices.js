@@ -288,6 +288,46 @@ const Invoices = () => {
     return iconEl;
   };
 
+  const renderHistory = (index) => {
+    if (!index) return;
+
+    const invoiceHistory = invoices[index].history || [];
+    let historyEl;
+
+    if (invoiceHistory.length > 0) {
+      historyEl = invoiceHistory.map((event, index) => (
+        <tr key={`event-${index}`}>
+          <td
+            key={`event-status-${index}`}
+            className="px-2 py-1 border-b border-gray-400 bg-white text-xs"
+          >
+            {event.invoice_status}
+          </td>
+          <td
+            key={`event-date-${index}`}
+            className="px-2 py-1 border-b border-gray-400 bg-white text-xs"
+          >
+            {new Date(event.status_date).toLocaleDateString()}
+          </td>
+        </tr>
+      ));
+    }
+
+    return historyEl;
+  };
+
+  const toggleHistory = (e) => {
+    const id = e?.target?.dataset?.id;
+
+    if (!id) return;
+
+    if (document.querySelector(`#history-${id}`).classList.contains('hidden')) {
+      document.querySelector(`#history-${id}`).classList.remove('hidden');
+    } else {
+      document.querySelector(`#history-${id}`).classList.add('hidden');
+    }
+  };
+
   const renderInvoices = () => {
     let today = new Date(Date.now());
     let invoiceEditable, invoiceDueDate, invoiceStatus;
@@ -309,58 +349,107 @@ const Invoices = () => {
           }
 
           return (
-            <tr key={index}>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <div className="flex justify-center items-center">
-                  <Icon
-                    icon="el:file-edit"
-                    className={
-                      (invoiceEditable ? 'cursor-pointer ' : 'text-gray-400 ') +
-                      'w-4 h-4 ml-0 mr-3'
-                    }
-                    data-id={invoice.id}
-                    onClick={(e) => {
-                      clickHandler(e);
-                    }}
-                  />
-                </div>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <div className="flex items-center">
-                  <div>
-                    <p className="text-gray-900 whitespace-no-wrap">
-                      {invoice.customer_name}
-                    </p>
+            <>
+              <tr key={`details-${index}`}>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                  <div className="flex">
+                    <div className="flex justify-center items-center">
+                      <Icon
+                        icon="el:file-edit"
+                        className={
+                          (invoiceEditable
+                            ? 'cursor-pointer '
+                            : 'text-gray-400 ') + 'w-4 h-4 ml-0 mr-3'
+                        }
+                        data-id={invoice.id}
+                        onClick={(e) => {
+                          clickHandler(e);
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <Icon
+                        icon="ant-design:plus-square-outlined"
+                        className="w-4 h-4"
+                        data-id={index}
+                        id={`toggleIcon${index}`}
+                        onClick={(e) => {
+                          toggleHistory(e);
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {invoice.customer_email}
-                </p>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {invoice.description}
-                </p>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  ${dollarUSLocale.format(invoice.total)}
-                </p>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                <p className="text-gray-900 whitespace-no-wrap">
-                  {new Date(invoice.due_date).toLocaleDateString()}
-                </p>
-              </td>
-              <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
-                <div className="flex items-center">
-                  {renderStatus(invoiceStatus)}
-                  {renderApprovalButton(invoiceStatus, invoice.id)}
-                </div>
-              </td>
-            </tr>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                  <div className="flex items-center">
+                    <div>
+                      <p className="text-gray-900 whitespace-no-wrap">
+                        {invoice.customer_name}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                  <p className="text-gray-900 whitespace-no-wrap">
+                    {invoice.customer_email}
+                  </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                  <p className="text-gray-900 whitespace-no-wrap">
+                    {invoice.description}
+                  </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
+                  <p className="text-gray-900 whitespace-no-wrap">
+                    ${dollarUSLocale.format(invoice.total)}
+                  </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
+                  <p className="text-gray-900 whitespace-no-wrap">
+                    {new Date(invoice.due_date).toLocaleDateString()}
+                  </p>
+                </td>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
+                  <div className="flex items-center">
+                    {renderStatus(invoiceStatus)}
+                    {renderApprovalButton(invoiceStatus, invoice.id)}
+                  </div>
+                </td>
+              </tr>
+              <tr
+                id={`history-${index}`}
+                key={`history-${index}`}
+                className="hidden"
+              >
+                <td
+                  className="px-5 pt-1 pb-5 border-b border-gray-400 bg-white text-sm"
+                  colSpan="7"
+                >
+                  <div className="py-2 font-md font-bold">History</div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th
+                          key="history-status"
+                          scope="col"
+                          className="px-2 py-1 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-xs uppercase font-bold"
+                        >
+                          Status
+                        </th>
+                        <th
+                          key="history-date"
+                          scope="col"
+                          className="px-2 py-1 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-xs uppercase font-bold"
+                        >
+                          Date
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>{renderHistory(index)}</tbody>
+                  </table>
+                </td>
+              </tr>
+            </>
           );
         })}
       </>

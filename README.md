@@ -18,7 +18,7 @@ We would like you to create a simple invoicing app with the following features:
   "status": "draft","approved","sent", paid"
   "total": 35000
 ``` 
- - [ ] Add 1 or many line items to the invoice. Line items may include a breakdown of each thing being invoiced for with an amount
+ - [X] Add 1 or many line items to the invoice. Line items may include a breakdown of each thing being invoiced for with an amount
  - [X] The ability to edit an invoice if its still in draft
  - [X] The ability to approve an invoice and send it out via email (email doesnt need to be actually sent, simulated is okay)
  - [X] View a list of invoices by status 
@@ -30,7 +30,7 @@ Your backend can be anything, and does not have to work. If you would like to us
  - [X] Persist data to storage 
  - [X] send the email
  - [X] View late invoices, or even better, alert when an invoice is late
- - [ ] Persist and display event history for an invoice. (ex: created, updated, approved, sent etc...)
+ - [X] Persist and display event history for an invoice. (ex: created, updated, approved, sent etc...)
 
 ## Tech Stack
 
