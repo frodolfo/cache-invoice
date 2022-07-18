@@ -285,24 +285,22 @@ const Invoices = () => {
         iconEl = (
           <Icon
             icon="bi:file-earmark-check"
-            className="text-green-700 h-8 w-5 ml-2 cursor-pointer"
+            className="text-orange-700 h-8 w-5 ml-2 cursor-pointer"
             data-id={id}
             onClick={(e) => approveInvoice(e)}
           />
         );
-
         break;
 
       case 'approved':
         iconEl = (
           <Icon
             icon="bx:mail-send"
-            className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
+            className="text-yellow-500 h-6 w-6 ml-2 cursor-pointer"
             data-id={id}
             onClick={(e) => emailInvoice(e)}
           />
         );
-
         break;
 
       case 'sent':
@@ -314,7 +312,6 @@ const Invoices = () => {
             onClick={(e) => payInvoice(e)}
           />
         );
-
         break;
 
       default:
@@ -503,7 +500,7 @@ const Invoices = () => {
                   </p>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
-                  <div className="flex items-center">
+                  <div className="flex items-center justify-between">
                     {renderStatus(invoiceStatus)}
                     {renderApprovalButton(invoiceStatus, invoice.id)}
                   </div>
