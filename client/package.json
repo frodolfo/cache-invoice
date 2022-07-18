@@ -4,6 +4,7 @@
   "private": true,
   "description": "Client component",
   "dependencies": {
+    "@emailjs/browser": "^3.6.2",
     "@emotion/react": "^11.9.3",
     "@heroicons/react": "^1.0.6",
     "@iconify/react": "^3.2.2",

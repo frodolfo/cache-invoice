@@ -6,7 +6,7 @@
   "private": true,
   "license": "ISC",
   "scripts": {
-    "client-start": "cd client && yarn start",
+    "client-start": "cd client && yarn start .env.development",
     "client-build": "cd client && yarn build",
     "client-test": "cd client && yarn test",
     "server-start": "cd server && yarn watch",

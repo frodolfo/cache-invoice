@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
+import emailjs from '@emailjs/browser';
 
 import * as API from '../../api/';
 import { Modal } from '../shared/';
@@ -8,41 +9,190 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState();
   const [formData, setFormData] = useState();
   const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState('New Invoice');
 
   const dollarUSLocale = Intl.NumberFormat('en-US');
 
   const fetchInvoices = async () => {
     let invoiceData = await API.fetchAllInvoices();
-    console.log(invoiceData);
-    setInvoices(invoiceData);
+
+    if (invoiceData) {
+      setInvoices(invoiceData);
+    }
   };
 
   useEffect(() => {
     fetchInvoices();
   }, []);
 
+  useEffect(() => {
+    if (formData) {
+      setShowModal(true);
+    }
+  }, [formData]);
+
+  // Event Handlers
   const clickHandler = async (e) => {
     const id = e?.target?.dataset?.id;
 
+    if (!id) {
+      console.error('*** ERROR: id not specified: ', e.target.dataset);
+      return;
+    }
+
     let result = await API.fetchInvoiceById(id);
 
-    if (result && result.current_status !== 'draft') {
-      // TODO: delete this
-      console.log('Cannot edit a non-draft invoice');
-    } else {
-      // TODO: delete this
-      console.log('result: ', result);
-      setFormData(result);
-      setShowModal(true);
+    if (!result) {
+      console.error(`*** ERROR: did not find invoice with id: ${id}`);
+      return;
     }
-  };
 
-  const showModalCallback = (status) => {
-    setShowModal(status);
+    if (result.current_status === 'draft') {
+      setModalTitle('Update Invoice');
+      setFormData(result);
+    }
   };
 
   const changeHandler = (e, fiield) => {};
 
+  // Component Methods
+  const showModalCallback = (status) => {
+    setShowModal(status);
+  };
+
+  const reconcileInvoices = (updatedInvoice) => {
+    let invoicesCopy = invoices;
+    let invoiceIndex;
+
+    if (updatedInvoice) {
+      invoiceIndex = invoicesCopy.findIndex(
+        (invoice) => invoice.id === updatedInvoice.id
+      );
+
+      if (invoiceIndex >= 0) {
+        // update list of invoices
+        invoicesCopy[invoiceIndex] = updatedInvoice;
+        setInvoices([...invoicesCopy]);
+      }
+
+      if (formData) {
+        setFormData(null);
+      }
+    }
+  };
+
+  const updateInvoice = async (id, action) => {
+    let invoice, newActivity, updateData, result, status;
+
+    if (!id || !action) return;
+
+    status = action;
+
+    invoice = await API.fetchInvoiceById(id);
+
+    if (invoice) {
+      // Set up new activity for the invoice's histoty
+      newActivity = [
+        {
+          invoice_status: status,
+          status_date: Date.now(),
+        },
+      ];
+
+      // Set up update data for the PUT request
+      updateData = {
+        id,
+        current_status: status,
+        history: newActivity.concat(invoice.history),
+      };
+
+      result = await API.putInvoiceUpdate(updateData);
+
+      reconcileInvoices(result);
+    }
+  };
+
+  const approveInvoice = async (e) => {
+    const id = e?.target?.dataset.id;
+
+    if (!id) return;
+
+    updateInvoice(id, 'approved');
+  };
+
+  const emailInvoice = async (e) => {
+    const id = e?.target?.dataset.id;
+    let templateParams, invoice, lineItems;
+
+    if (!id) return;
+
+    invoice = await API.fetchInvoiceById(id);
+    updateInvoice(id, 'sent');
+
+    lineItems = invoice.line_items.map((li) => {
+      return (
+        `<li>${li.item_name}:` +
+        '$' +
+        `${dollarUSLocale.format(li.item_price)}</li>`
+      );
+    });
+
+    templateParams = {
+      to_name: 'Fred',
+      message: 'This is your invoice',
+      total: '$' + dollarUSLocale.format(invoice.total),
+      line_items: `<ul>${lineItems}</ul>`,
+    };
+
+    emailjs
+      .send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      )
+      .then(
+        (result) => {
+          console.log(result.text);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
+  };
+
+  const submitInvoice = async (payload) => {
+    if (!payload) {
+      console.error('*** ERROR: payload is missing');
+      return;
+    }
+
+    let newHistory = {
+      invoice_status: payload?.current_status,
+      status_date: Date.now(),
+    };
+    let result, postData;
+
+    newHistory =
+      Array.isArray(payload.history) && payload.history.length > 0
+        ? payload.history.concat(newHistory, payload.history)
+        : [newHistory];
+
+    postData = {
+      ...payload,
+      history: newHistory,
+    };
+
+    if (payload.submitType === 'new') {
+      result = await API.postNewInvoice(postData);
+      setInvoices([result, ...invoices]);
+    } else {
+      result = await API.putInvoiceUpdate(postData);
+      reconcileInvoices(result);
+    }
+  };
+
+  // Render Methods
   const renderStatus = (status) => {
     let colorConfig;
 
@@ -250,101 +400,12 @@ const Invoices = () => {
     );
   };
 
-  const updateInvoice = async (id, action) => {
-    const invoicesCopy = invoices;
-    let invoice, invoiceIndex, newActivity, updateData, result, status;
-
-    if (!id || !action) return;
-
-    status = action;
-
-    invoice = await API.fetchInvoiceById(id);
-
-    if (invoice) {
-      // Set up new activity for the invoice's histoty
-      newActivity = [
-        {
-          invoice_status: status,
-          status_date: Date.now(),
-        },
-      ];
-
-      // Set up update data for the PUT request
-      updateData = {
-        id,
-        current_status: status,
-        history: newActivity.concat(invoice.history),
-      };
-
-      result = await API.putInvoiceUpdate(updateData);
-
-      if (result) {
-        invoiceIndex = invoicesCopy.findIndex(
-          (invoice) => invoice.id === result.id
-        );
-
-        if (invoiceIndex >= 0) {
-          // update list of invoices
-          invoicesCopy[invoiceIndex] = result;
-          setInvoices([...invoicesCopy]);
-        }
-      }
-    }
-  };
-
-  const approveInvoice = async (e) => {
-    const id = e?.target?.dataset.id;
-
-    if (!id) return;
-
-    updateInvoice(id, 'approved');
-  };
-
-  const emailInvoice = async (e) => {
-    const id = e?.target?.dataset.id;
-
-    if (!id) return;
-
-    updateInvoice(id, 'sent');
-    // TODO: send an email
-  };
-
-  const submitInvoice = async (payload) => {
-    if (!payload) return;
-
-    let newHistory = {
-      invoice_status: payload?.current_status,
-      status_date: Date.now(),
-    };
-    let result;
-
-    newHistory =
-      Array.isArray(payload.history) && payload.history.length > 0
-        ? payload.history.concat(newHistory, payload.history)
-        : [newHistory];
-
-    const postData = {
-      ...payload,
-      history: newHistory,
-    };
-
-    if (payload.submitType === 'new') {
-      result = await API.postNewInvoice(postData);
-    } else {
-      result = await API.putInvoiceUpdate(postData);
-    }
-
-    // TODO: delete this
-    console.log('result: ', result);
-    setInvoices([result, ...invoices]);
-  };
-
   return (
     <div className="px-9 w-screen">
       <div className="text-xl font-bold pl-2">Invoices</div>
       <div>
         <Modal
-          buttonLabel={'New Invoice'}
+          modalTitle={modalTitle}
           clickHandler={(p) => submitInvoice(p)}
           formData={formData}
           overrideShowModal={showModal}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const Modal = ({
-  buttonLabel,
+  modalTitle,
   clickHandler,
   formData,
   overrideShowModal,
@@ -18,14 +18,15 @@ const Modal = ({
 
   useEffect(() => {
     if (formData) {
-      // TODO: delete this
-      console.log('formData: ', formData);
+      setFullName(formData.customer_name);
+      setEmailAddress(formData.customer_email);
+      setDescription(formData.description);
+      setDueDate(formData.due_date);
+      setTotalCost(formData.total);
+      setLineItems(formData.line_items);
       setFormContent(formData);
     }
-    if (formContent) {
-      console.log('formContent: ', formContent);
-    }
-  }, []);
+  }, [formData, formContent]);
 
   useEffect(() => {
     if (overrideShowModal === true) {
@@ -63,15 +64,20 @@ const Modal = ({
   };
 
   const onClickHandler = () => {
-    const payload = {
+    let payload = {
       customer_email: fullName,
       customer_name: emailAddress,
       description,
       due_date: dueDate,
       total: totalCost,
       current_status: 'draft',
-      submitType: !formData ? 'new' : 'update',
+      submitType: 'new',
     };
+
+    if (formData) {
+      payload['id'] = formData.id;
+      payload['submitType'] = 'update';
+    }
 
     setShowModal(false);
     showModalCallback(false);
@@ -118,7 +124,7 @@ const Modal = ({
         type="button"
         onClick={() => setShowModal(true)}
       >
-        {buttonLabel}
+        New Invoice
       </button>
       {showModal ? (
         <>
@@ -128,7 +134,7 @@ const Modal = ({
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
-                  <h3 className="text-3xl font=semibold">New Invoice</h3>
+                  <h3 className="text-3xl font=semibold">{modalTitle}</h3>
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
                     onClick={() => {
@@ -176,7 +182,7 @@ const Modal = ({
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
-                      name="description"
+                      name="dueDate"
                       value={dueDate}
                       onChange={(e) => onChangeHandler(e, 'dueDate')}
                     />
@@ -193,6 +199,7 @@ const Modal = ({
                       value={totalCost}
                       onChange={(e) => onChangeHandler(e, 'totalCost')}
                     />
+                    <input type="hidden" value={formData} />
                   </form>
                 </div>
                 {/*footer*/}
