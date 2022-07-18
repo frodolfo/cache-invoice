@@ -126,11 +126,15 @@ const Invoices = () => {
     updateInvoice(id, 'approved');
   };
 
-  const emailInvoice = async (e) => {
+  const emailInvoice = async (e, emailType) => {
     const id = e.target.dataset.id;
     let templateParams, invoice, lineItems;
 
     if (!id) return;
+
+    if (!emailType) {
+      emailType = 'notify';
+    }
 
     invoice = await API.fetchInvoiceById(id);
     updateInvoice(id, 'sent');
@@ -143,12 +147,23 @@ const Invoices = () => {
       );
     });
 
-    templateParams = {
-      to_name: 'Fred',
-      message: 'This is your invoice',
-      total: '$' + dollarUSLocale.format(invoice.total),
-      line_items: `<ul>${lineItems}</ul>`,
-    };
+    if (emailType === 'reminder') {
+      templateParams = {
+        to_name: 'Fred',
+        message:
+          'This is a friendly reminder that your invoice is past due.  Please see details below and contact us immediately.',
+        total: '$' + dollarUSLocale.format(invoice.total),
+        line_items: `<ul>${lineItems}</ul>`,
+      };
+    } else {
+      templateParams = {
+        to_name: 'Fred',
+        message:
+          'Thank you for your business.  Here is a copy of your invoice.',
+        total: '$' + dollarUSLocale.format(invoice.total),
+        line_items: `<ul>${lineItems}</ul>`,
+      };
+    }
 
     emailjs
       .send(
@@ -298,7 +313,7 @@ const Invoices = () => {
             icon="bx:mail-send"
             className="text-yellow-500 h-6 w-6 ml-2 cursor-pointer"
             data-id={id}
-            onClick={(e) => emailInvoice(e)}
+            onClick={(e) => emailInvoice(e, 'notify')}
           />
         );
         break;
@@ -310,6 +325,17 @@ const Invoices = () => {
             className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
             data-id={id}
             onClick={(e) => payInvoice(e)}
+          />
+        );
+        break;
+
+      case 'past due':
+        iconEl = (
+          <Icon
+            icon="ant-design:warning-filled"
+            className="text-red-700 h-6 w-6 ml-2 cursor-pointer"
+            data-id={id}
+            onClick={(e) => emailInvoice(e, 'reninder')}
           />
         );
         break;
