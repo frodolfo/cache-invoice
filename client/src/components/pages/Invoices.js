@@ -77,7 +77,7 @@ const Invoices = () => {
       if (invoiceIndex >= 0) {
         // update list of invoices
         invoicesCopy[invoiceIndex] = updatedInvoice;
-        // setInvoices([...invoicesCopy]);
+        setInvoices([...invoicesCopy]);
         setInvoicesCache([...invoicesCopy]);
       }
 
@@ -119,7 +119,7 @@ const Invoices = () => {
   };
 
   const approveInvoice = async (e) => {
-    const id = e?.target?.dataset.id;
+    const id = e.target.dataset.id;
 
     if (!id) return;
 
@@ -127,7 +127,7 @@ const Invoices = () => {
   };
 
   const emailInvoice = async (e) => {
-    const id = e?.target?.dataset.id;
+    const id = e.target.dataset.id;
     let templateParams, invoice, lineItems;
 
     if (!id) return;
@@ -137,7 +137,7 @@ const Invoices = () => {
 
     lineItems = invoice.line_items.map((li, index) => {
       return (
-        `<li key="${li.item_name}${index}">${li.item_name}:` +
+        `<li key="item-${index}">${li.item_name}:` +
         '$' +
         `${dollarUSLocale.format(li.item_price)}</li>`
       );
@@ -165,6 +165,14 @@ const Invoices = () => {
           console.log(error.text);
         }
       );
+  };
+
+  const payInvoice = async (e) => {
+    const id = e.target.dataset.id;
+
+    if (!id) return;
+
+    updateInvoice(id, 'paid');
   };
 
   const submitInvoice = async (payload) => {
@@ -272,32 +280,73 @@ const Invoices = () => {
 
     if (!invoiceStatus) return;
 
-    if (invoiceStatus === 'draft') {
-      iconEl = (
-        <Icon
-          icon="bi:file-earmark-check"
-          className="text-green-700 h-8 ml-2 cursor-pointer"
-          data-id={id}
-          onClick={(e) => approveInvoice(e)}
-        />
-      );
-    } else if (invoiceStatus === 'approved') {
-      iconEl = (
-        <Icon
-          icon="bx:mail-send"
-          className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
-          data-id={id}
-          onClick={(e) => emailInvoice(e)}
-        />
-      );
-    } else {
-      iconEl = null;
+    switch (invoiceStatus) {
+      case 'draft':
+        iconEl = (
+          <Icon
+            icon="bi:file-earmark-check"
+            className="text-green-700 h-8 w-5 ml-2 cursor-pointer"
+            data-id={id}
+            onClick={(e) => approveInvoice(e)}
+          />
+        );
+
+        break;
+
+      case 'approved':
+        iconEl = (
+          <Icon
+            icon="bx:mail-send"
+            className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
+            data-id={id}
+            onClick={(e) => emailInvoice(e)}
+          />
+        );
+
+        break;
+
+      case 'sent':
+        iconEl = (
+          <Icon
+            icon="bx:credit-card"
+            className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
+            data-id={id}
+            onClick={(e) => payInvoice(e)}
+          />
+        );
+
+        break;
+
+      default:
+        // do nothing
+        iconEl = null;
     }
+    // if (invoiceStatus === 'draft') {
+    //   iconEl = (
+    //     <Icon
+    //       icon="bi:file-earmark-check"
+    //       className="text-green-700 h-8 ml-2 cursor-pointer"
+    //       data-id={id}
+    //       onClick={(e) => approveInvoice(e)}
+    //     />
+    //   );
+    // } else if (invoiceStatus === 'approved') {
+    //   iconEl = (
+    //     <Icon
+    //       icon="bx:mail-send"
+    //       className="text-green-700 h-6 w-6 ml-2 cursor-pointer"
+    //       data-id={id}
+    //       onClick={(e) => emailInvoice(e)}
+    //     />
+    //   );
+    // } else {
+    //   iconEl = null;
+    // }
 
     return iconEl;
   };
 
-  const renderHistory = (index) => {
+  const renderHistory = (index, id) => {
     if (!index) return;
 
     const invoiceHistory = invoices[index].history || [];
@@ -305,15 +354,15 @@ const Invoices = () => {
 
     if (invoiceHistory.length > 0) {
       historyEl = invoiceHistory.map((event, index) => (
-        <tr key={`event-${index}`}>
+        <tr key={`event-${id}-${index}`}>
           <td
-            key={`event-status-${index}`}
+            key={`event-status-${id}-${index}`}
             className="px-2 py-1 border-b border-gray-400 bg-white text-xs"
           >
             {event.invoice_status}
           </td>
           <td
-            key={`event-date-${index}`}
+            key={`event-date-${id}-${index}`}
             className="px-2 py-1 border-b border-gray-400 bg-white text-xs"
           >
             {new Date(event.status_date).toLocaleDateString()}
@@ -390,11 +439,8 @@ const Invoices = () => {
 
           return (
             <>
-              <tr key={`details-${index}`}>
-                <td
-                  key={`details-item1-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
-                >
+              <tr key={`details-${invoice.id}`}>
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                   <div className="flex">
                     <div className="flex justify-center items-center">
                       <Icon
@@ -413,20 +459,21 @@ const Invoices = () => {
                     <div className="flex justify-center items-center">
                       <Icon
                         icon="ant-design:plus-square-outlined"
-                        className="w-4 h-4"
+                        className="w-4 h-4 cursor-pointer"
                         data-id={index}
                         id={`toggleIcon${index}`}
                         onClick={(e) => {
                           toggleHistory(e);
                         }}
                       />
+                      {/* 
+                      TODO: use this icon when History is visible
+                      <Icon icon="ant-design:minus-square-twotone" /> 
+                      */}
                     </div>
                   </div>
                 </td>
-                <td
-                  key={`details-item2-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                   <div className="flex items-center">
                     <div>
                       <p className="text-gray-900 whitespace-no-wrap">
@@ -435,42 +482,27 @@ const Invoices = () => {
                     </div>
                   </div>
                 </td>
-                <td
-                  key={`details-item3-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                   <p className="text-gray-900 whitespace-no-wrap">
                     {invoice.customer_email}
                   </p>
                 </td>
-                <td
-                  key={`details-item4-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
                   <p className="text-gray-900 whitespace-no-wrap">
                     {invoice.description}
                   </p>
                 </td>
-                <td
-                  key={`details-item5-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
                   <p className="text-gray-900 whitespace-no-wrap">
                     ${dollarUSLocale.format(invoice.total)}
                   </p>
                 </td>
-                <td
-                  key={`details-item6-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
                   <p className="text-gray-900 whitespace-no-wrap">
                     {new Date(invoice.due_date).toLocaleDateString()}
                   </p>
                 </td>
-                <td
-                  key={`details-item7-${index}`}
-                  className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center"
-                >
+                <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
                   <div className="flex items-center">
                     {renderStatus(invoiceStatus)}
                     {renderApprovalButton(invoiceStatus, invoice.id)}
@@ -478,8 +510,8 @@ const Invoices = () => {
                 </td>
               </tr>
               <tr
-                id={`history-${index}`}
-                key={`history-${index}`}
+                id={`history-${invoice.id}`}
+                key={`history-${invoice.id}`}
                 className="hidden"
               >
                 <td
@@ -489,16 +521,16 @@ const Invoices = () => {
                   <div className="py-2 font-md font-bold">History</div>
                   <table>
                     <thead>
-                      <tr>
+                      <tr key={`history-header-${invoice.id}`}>
                         <th
-                          key="history-status"
+                          key={`history-status-${invoice.id}`}
                           scope="col"
                           className="px-2 py-1 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-xs uppercase font-bold"
                         >
                           Status
                         </th>
                         <th
-                          key="history-date"
+                          key={`history-date-${invoice.id}`}
                           scope="col"
                           className="px-2 py-1 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-xs uppercase font-bold"
                         >
@@ -506,7 +538,7 @@ const Invoices = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{renderHistory(index)}</tbody>
+                    <tbody>{renderHistory(index, invoice.id)}</tbody>
                   </table>
                 </td>
               </tr>
@@ -530,37 +562,43 @@ const Invoices = () => {
         />
         <div className="flex">
           <button
-            className="m-2 p-2 text-xs font-bold text-gray-900 bg-gray-200"
+            key="filterAll"
+            className="m-2 p-2 text-xs font-bold text-gray-900 bg-gray-200 rounded transition duration-150 ease-in-out hover:bg-gray-100"
             onClick={(e) => filterInvoices('all')}
           >
             All
           </button>
           <button
-            className="m-2 p-2 text-xs font-bold text-blue-900 bg-blue-200"
+            key="filterDraft"
+            className="m-2 p-2 text-xs font-bold text-blue-900 bg-blue-200 rounded transition duration-150 ease-in-out hover:bg-blue-100"
             onClick={(e) => filterInvoices('draft')}
           >
             Draft
           </button>
           <button
-            className="m-2 p-2 text-xs font-bold text-orange-900 bg-orange-200"
+            key="filterApproved"
+            className="m-2 p-2 text-xs font-bold text-orange-900 bg-orange-200 rounded transition duration-150 ease-in-out hover:bg-orange-100"
             onClick={(e) => filterInvoices('approved')}
           >
             Approved
           </button>
           <button
-            className="m-2 p-2 text-xs font-bold text-yellow-900 bg-yellow-200"
+            key="filterSent"
+            className="m-2 p-2 text-xs font-bold text-yellow-900 bg-yellow-200 rounded transition duration-150 ease-in-out hover:bg-yellow-100"
             onClick={(e) => filterInvoices('sent')}
           >
             Semt
           </button>
           <button
-            className="m-2 p-2 text-xs font-bold text-green-900 bg-green-200"
+            key="filterPaid"
+            className="m-2 p-2 text-xs font-bold text-green-900 bg-green-200 rounded transition duration-150 ease-in-out hover:bg-green-100"
             onClick={(e) => filterInvoices('paid')}
           >
             Paid
           </button>
           <button
-            className="m-2 p-2 text-xs font-bold text-red-900 bg-red-200"
+            key="filterPastDue"
+            className="m-2 p-2 text-xs font-bold text-red-900 bg-red-200 rounded transition duration-150 ease-in-out hover:bg-red-100"
             onClick={(e) => filterInvoices('past due')}
           >
             Past Due
@@ -573,44 +611,51 @@ const Invoices = () => {
             <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
               <table className="min-w-full leading-normal">
                 <thead>
-                  <tr>
+                  <tr key="invoiceHeader">
                     <th
+                      key="headerEdit"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-bold"
                     >
                       Edit
                     </th>
                     <th
+                      key="headerName"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-bold"
                     >
                       Name
                     </th>
                     <th
+                      key="headerEmail"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-bold"
                     >
                       Email
                     </th>
                     <th
+                      key="headerDescription"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-left text-sm uppercase font-bold"
                     >
                       Description
                     </th>
                     <th
+                      key="headerTotal"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-right text-sm uppercase font-bold"
                     >
                       Total
                     </th>
                     <th
+                      key="headerDueDate"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-right text-sm uppercase font-bold"
                     >
                       Due Date
                     </th>
                     <th
+                      key="headerStatus"
                       scope="col"
                       className="px-5 py-3 bg-gray-300 border-b border-gray-200 text-gray-800 text-center text-sm uppercase font-bold"
                     >
