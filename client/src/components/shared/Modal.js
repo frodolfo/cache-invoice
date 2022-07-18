@@ -14,7 +14,7 @@ const Modal = ({
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(Date.now());
   const [totalCost, setTotalCost] = useState(0);
-  const [lineItems, setLineItems] = useState();
+  const [lineItems, setLineItems] = useState([]);
 
   useEffect(() => {
     if (formData) {
@@ -33,6 +33,14 @@ const Modal = ({
       setShowModal(true);
     }
   }, [overrideShowModal]);
+
+  const formatDate = (rawDate) => {
+    if (!rawDate) {
+      return new Date(Date.now()).toLocaleDateString();
+    }
+
+    return new Date(rawDate).toLocaleDateString();
+  };
 
   const onChangeHandler = (e, field) => {
     if (!e || !field) return;
@@ -238,7 +246,7 @@ const Modal = ({
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="dueDate"
-                      value={new Date(dueDate).toLocaleDateString()}
+                      value={dueDate}
                       onChange={(e) => onChangeHandler(e, 'dueDate')}
                     />
                     <label className="block text-gray-700 text-sm font-bold mb-1">

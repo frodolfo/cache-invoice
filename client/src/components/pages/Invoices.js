@@ -173,16 +173,18 @@ const Invoices = () => {
       return;
     }
 
-    let newHistory = {
-      invoice_status: payload?.current_status,
-      status_date: Date.now(),
-    };
+    let newHistory = [
+      {
+        invoice_status: payload?.current_status,
+        status_date: Date.now(),
+      },
+    ];
     let result, postData;
 
     newHistory =
       Array.isArray(payload.history) && payload.history.length > 0
-        ? payload.history.concat(newHistory, payload.history)
-        : [newHistory];
+        ? newHistory.concat(payload.history)
+        : newHistory;
 
     postData = {
       ...payload,
