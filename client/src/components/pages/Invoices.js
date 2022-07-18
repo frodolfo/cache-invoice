@@ -7,9 +7,11 @@ import { Modal } from '../shared/';
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState();
+  const [invoicesCache, setInvoicesCache] = useState();
   const [formData, setFormData] = useState();
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState('New Invoice');
+  const [invoiceFilter, setInvoiceFilter] = useState();
 
   const dollarUSLocale = Intl.NumberFormat('en-US');
 
@@ -18,6 +20,11 @@ const Invoices = () => {
 
     if (invoiceData) {
       setInvoices(invoiceData);
+      setInvoicesCache(invoiceData);
+
+      if (invoiceFilter) {
+        filterInvoices(invoiceFilter);
+      }
     }
   };
 
@@ -53,15 +60,13 @@ const Invoices = () => {
     }
   };
 
-  const changeHandler = (e, fiield) => {};
-
   // Component Methods
   const showModalCallback = (status) => {
     setShowModal(status);
   };
 
   const reconcileInvoices = (updatedInvoice) => {
-    let invoicesCopy = invoices;
+    let invoicesCopy = invoicesCache;
     let invoiceIndex;
 
     if (updatedInvoice) {
@@ -72,7 +77,8 @@ const Invoices = () => {
       if (invoiceIndex >= 0) {
         // update list of invoices
         invoicesCopy[invoiceIndex] = updatedInvoice;
-        setInvoices([...invoicesCopy]);
+        // setInvoices([...invoicesCopy]);
+        setInvoicesCache([...invoicesCopy]);
       }
 
       if (formData) {
@@ -129,9 +135,9 @@ const Invoices = () => {
     invoice = await API.fetchInvoiceById(id);
     updateInvoice(id, 'sent');
 
-    lineItems = invoice.line_items.map((li) => {
+    lineItems = invoice.line_items.map((li, index) => {
       return (
-        `<li>${li.item_name}:` +
+        `<li key="${li.item_name}${index}">${li.item_name}:` +
         '$' +
         `${dollarUSLocale.format(li.item_price)}</li>`
       );
@@ -186,6 +192,7 @@ const Invoices = () => {
     if (payload.submitType === 'new') {
       result = await API.postNewInvoice(postData);
       setInvoices([result, ...invoices]);
+      setInvoicesCache([result, ...invoices]);
     } else {
       result = await API.putInvoiceUpdate(postData);
       reconcileInvoices(result);
@@ -328,17 +335,48 @@ const Invoices = () => {
     }
   };
 
+  const filterInvoices = (filter) => {
+    let filteredInvoices;
+
+    if (!filter) return;
+
+    if (filter === 'all') {
+      filteredInvoices = invoices;
+    } else {
+      if (filter === 'past due') {
+        let today = new Date(Date.now());
+        let invoiceDueDate;
+
+        filteredInvoices = invoices.filter((invoice) => {
+          invoiceDueDate = new Date(invoice.due_date);
+          if (invoiceDueDate < today) {
+            return invoice;
+          } else {
+            return false;
+          }
+        });
+      } else {
+        filteredInvoices = invoices.filter(
+          (invoice) => invoice.current_status === filter
+        );
+      }
+      setInvoiceFilter(filter);
+    }
+
+    setInvoicesCache(filteredInvoices);
+  };
+
   const renderInvoices = () => {
     let today = new Date(Date.now());
     let invoiceEditable, invoiceDueDate, invoiceStatus;
 
-    if (!invoices || !Array.isArray(invoices)) {
+    if (!invoicesCache || !Array.isArray(invoicesCache)) {
       return;
     }
 
     return (
       <>
-        {invoices.map((invoice, index) => {
+        {invoicesCache.map((invoice, index) => {
           invoiceDueDate = new Date(invoice.due_date);
           invoiceEditable = invoice.current_status === 'draft';
 
@@ -351,7 +389,10 @@ const Invoices = () => {
           return (
             <>
               <tr key={`details-${index}`}>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                <td
+                  key={`details-item1-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
+                >
                   <div className="flex">
                     <div className="flex justify-center items-center">
                       <Icon
@@ -380,7 +421,10 @@ const Invoices = () => {
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                <td
+                  key={`details-item2-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
+                >
                   <div className="flex items-center">
                     <div>
                       <p className="text-gray-900 whitespace-no-wrap">
@@ -389,27 +433,42 @@ const Invoices = () => {
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                <td
+                  key={`details-item3-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
+                >
                   <p className="text-gray-900 whitespace-no-wrap">
                     {invoice.customer_email}
                   </p>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
+                <td
+                  key={`details-item4-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm"
+                >
                   <p className="text-gray-900 whitespace-no-wrap">
                     {invoice.description}
                   </p>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
+                <td
+                  key={`details-item5-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right"
+                >
                   <p className="text-gray-900 whitespace-no-wrap">
                     ${dollarUSLocale.format(invoice.total)}
                   </p>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
+                <td
+                  key={`details-item6-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right"
+                >
                   <p className="text-gray-900 whitespace-no-wrap">
                     {new Date(invoice.due_date).toLocaleDateString()}
                   </p>
                 </td>
-                <td className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center">
+                <td
+                  key={`details-item7-${index}`}
+                  className="px-5 py-5 border-b border-gray-400 bg-white text-md text-center"
+                >
                   <div className="flex items-center">
                     {renderStatus(invoiceStatus)}
                     {renderApprovalButton(invoiceStatus, invoice.id)}
@@ -459,7 +518,7 @@ const Invoices = () => {
   return (
     <div className="px-9 w-screen">
       <div className="text-xl font-bold pl-2">Invoices</div>
-      <div>
+      <div className="flex w-full justify-between">
         <Modal
           modalTitle={modalTitle}
           clickHandler={(p) => submitInvoice(p)}
@@ -467,6 +526,44 @@ const Invoices = () => {
           overrideShowModal={showModal}
           showModalCallback={showModalCallback}
         />
+        <div className="flex">
+          <button
+            className="m-2 p-2 text-xs font-bold text-gray-900 bg-gray-200"
+            onClick={(e) => filterInvoices('all')}
+          >
+            All
+          </button>
+          <button
+            className="m-2 p-2 text-xs font-bold text-blue-900 bg-blue-200"
+            onClick={(e) => filterInvoices('draft')}
+          >
+            Draft
+          </button>
+          <button
+            className="m-2 p-2 text-xs font-bold text-orange-900 bg-orange-200"
+            onClick={(e) => filterInvoices('approved')}
+          >
+            Approved
+          </button>
+          <button
+            className="m-2 p-2 text-xs font-bold text-yellow-900 bg-yellow-200"
+            onClick={(e) => filterInvoices('sent')}
+          >
+            Semt
+          </button>
+          <button
+            className="m-2 p-2 text-xs font-bold text-green-900 bg-green-200"
+            onClick={(e) => filterInvoices('paid')}
+          >
+            Paid
+          </button>
+          <button
+            className="m-2 p-2 text-xs font-bold text-red-900 bg-red-200"
+            onClick={(e) => filterInvoices('past due')}
+          >
+            Past Due
+          </button>
+        </div>
       </div>
       <div className="mx-auto">
         <div className="py-2">
