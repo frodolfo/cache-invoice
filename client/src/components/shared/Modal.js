@@ -12,7 +12,7 @@ const Modal = ({
   const [fullName, setFullName] = useState('');
   const [emailAddress, setEmailAddress] = useState('');
   const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState(Date.now());
   const [totalCost, setTotalCost] = useState(0);
   const [lineItems, setLineItems] = useState();
 
@@ -51,7 +51,7 @@ const Modal = ({
         break;
 
       case 'dueDate':
-        setDueDate(e?.target?.value);
+        setDueDate(e?.target?.value || Date.now());
         break;
 
       case 'totalCost':
@@ -70,6 +70,7 @@ const Modal = ({
       description,
       due_date: dueDate,
       total: totalCost,
+      line_items: lineItems,
       current_status: 'draft',
       submitType: 'new',
     };
@@ -84,23 +85,77 @@ const Modal = ({
     clickHandler(payload);
   };
 
-  const renderLineItem = () => {
-    const items = lineItems || [];
+  const onItemNameChange = (e) => {
+    let id = e?.target?.dataset?.id;
+    let lineItemValue = e?.target?.value;
+    let lineItemsCopy = lineItems;
 
-    // if (!lineItems || !Array.isArray(lineItems)) return;
+    if (!id || !lineItemValue) return;
+
+    lineItemsCopy[id]['item_name'] = lineItemValue;
+    setLineItems([...lineItemsCopy]);
+  };
+
+  const onItemPriceChange = (e) => {
+    let id = e?.target?.dataset?.id;
+    let lineItemValue = e?.target?.value;
+    let lineItemsCopy = lineItems;
+    let newTotal;
+
+    if (!id || !lineItemValue) return;
+
+    lineItemsCopy[id]['item_price'] = lineItemValue;
+    setLineItems([...lineItemsCopy]);
+    newTotal = lineItemsCopy.reduce(
+      (prevLineItem, nextLineItem) =>
+        parseInt(prevLineItem) + parseInt(nextLineItem.item_price),
+      0
+    );
+    setTotalCost(newTotal);
+  };
+
+  const renderLineItem = () => {
+    let newItem;
 
     const addItem = (e) => {
       e.preventDefault();
-      console.log('New item');
+      newItem = [
+        {
+          item_name: '',
+          item_price: 0,
+        },
+      ];
+      setLineItems(lineItems.concat(newItem));
     };
 
     return (
       <div className="py-4">
         <ul className="pb-4">
-          {items.length > 0 ? (
-            items.map((item, index) => (
+          {Array.isArray(lineItems) && lineItems.length > 0 ? (
+            lineItems.map((item, index) => (
               <li key={index} className="text-sm">
-                {item.item_name} - {item.item_price}
+                <label className="p-1" htmlFor={`item$Name{index}`}>
+                  Item Name
+                </label>
+                <input
+                  className="m-1 p-1"
+                  type="text"
+                  name={`itemName${index}`}
+                  data-id={index}
+                  value={item.item_name || ''}
+                  onChange={(e) => onItemNameChange(e)}
+                />
+                <label className="p-1" htmlFor={`itemPrice${index}`}>
+                  Item Price
+                </label>
+                <input
+                  className="m-1 p-1"
+                  type="text"
+                  name={`itemPrice${index}`}
+                  data-id={index}
+                  value={item.item_price || ''}
+                  onChange={(e) => onItemPriceChange(e)}
+                />
               </li>
             ))
           ) : (
@@ -183,7 +238,7 @@ const Modal = ({
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-1 text-black mb-2"
                       name="dueDate"
-                      value={dueDate}
+                      value={new Date(dueDate).toLocaleDateString()}
                       onChange={(e) => onChangeHandler(e, 'dueDate')}
                     />
                     <label className="block text-gray-700 text-sm font-bold mb-1">

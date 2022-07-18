@@ -300,12 +300,7 @@ const Invoices = () => {
       <>
         {invoices.map((invoice, index) => {
           invoiceDueDate = new Date(invoice.due_date);
-
-          if (invoice.current_status === 'draft') {
-            invoiceEditable = true;
-          } else {
-            invoiceEditable = false;
-          }
+          invoiceEditable = invoice.current_status === 'draft';
 
           if (invoiceDueDate < today) {
             invoiceStatus = 'past due';
@@ -325,9 +320,7 @@ const Invoices = () => {
                     }
                     data-id={invoice.id}
                     onClick={(e) => {
-                      if (invoiceEditable) {
-                        clickHandler(e);
-                      }
+                      clickHandler(e);
                     }}
                   />
                 </div>
@@ -338,51 +331,25 @@ const Invoices = () => {
                     <p className="text-gray-900 whitespace-no-wrap">
                       {invoice.customer_name}
                     </p>
-                    {/* <input
-                      type="text"
-                      className="text-gray-900 whitespace-no-wrap"
-                      value={invoice.customer_name}
-                    /> */}
                   </div>
                 </div>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                {/* <input
-                  type="text"
-                  className="text-gray-900 whitespace-no-wrap"
-                  value={invoice.customer_email}
-                /> */}
                 <p className="text-gray-900 whitespace-no-wrap">
                   {invoice.customer_email}
                 </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm">
-                {/* <input
-                  type="text"
-                  className="text-gray-900 whitespace-no-wrap"
-                  value={invoice.description}
-                /> */}
                 <p className="text-gray-900 whitespace-no-wrap">
                   {invoice.description}
                 </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                {/* $
-                <input
-                  type="text"
-                  className="text-gray-900 whitespace-no-wrap w-20 text-right"
-                  value={dollarUSLocale.format(invoice.total)}
-                /> */}
                 <p className="text-gray-900 whitespace-no-wrap">
                   ${dollarUSLocale.format(invoice.total)}
                 </p>
               </td>
               <td className="px-5 py-5 border-b border-gray-400 bg-white text-sm text-right">
-                {/* <input
-                  type="text"
-                  className="text-gray-900 whitespace-no-wrap w-20 text-right"
-                  value={new Date(invoice.due_date).toLocaleDateString()}
-                /> */}
                 <p className="text-gray-900 whitespace-no-wrap">
                   {new Date(invoice.due_date).toLocaleDateString()}
                 </p>
